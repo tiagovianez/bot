@@ -1,7 +1,7 @@
 import booking.constants as const
 import os
 from selenium import webdriver
-from booking.booking_filtration import BookFiltration
+from booking.booking_filtration import BookingFiltration
 
 
 class Booking(webdriver.Chrome):
@@ -10,7 +10,9 @@ class Booking(webdriver.Chrome):
         self.driver_path = driver_path
         self.teardown = teardown
         os.environ['PATH'] += self.driver_path
-        super(Booking, self).__init__()
+        options = webdriver.ChromeOptions()
+        options.add_experimental_option('excludeSwitches', ['enable-logging'])
+        super(Booking, self).__init__(options=options)
         self.implicitly_wait(15)
         self.maximize_window()
 
@@ -84,8 +86,17 @@ class Booking(webdriver.Chrome):
         search_button.click()
 
     def apply_filtrations(self):
-        filtration = BookFiltration(driver=self)
-        filtration.apply_star_rating()
+        filtration = BookingFiltration(driver=self)
+        filtration.apply_star_rating(4, 5)
+
+        filtration.sort_price_lowest_first()
+
+    def report_results(self):
+        hotel_boxes = self.find_element_by_id(
+            'search_results_table'
+        ).find_elements_by_class_name('hotellist_wrap tracked shorten_property_block')
+        return hotel_boxes
+
 
 
 
